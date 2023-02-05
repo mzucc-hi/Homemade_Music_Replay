@@ -95,3 +95,8 @@ clean_genres_jan2023 %>%
       axis.text.x = element_blank()
     )
   
+
+# Save
+
+ggsave("figures/genre_barchart.png", width = 15, height = 20, units = "cm")
+
