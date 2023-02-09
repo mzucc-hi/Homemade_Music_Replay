@@ -102,6 +102,7 @@ clean_genres_jan2023 %>%
     ggforce::geom_mark_ellipse(
       data = top_song_label,
       aes(x = genre, y = plays, label = paste0("'", title, "', ", artist)),
+      inherit.aes = F,
       expand = unit(0, "mm"),
       label.margin = margin(b =0, l = 0, r = 0, t = 1.5, "mm"),
       label.buffer = unit(1, "mm"),
@@ -112,14 +113,14 @@ clean_genres_jan2023 %>%
       label.family = "sans",
       label.fontface = "plain",
       con.size = 0.25,
-      con.type = "straight",
+      con.type = "elbow",
       con.border = "none"
     ) +
     coord_flip() +
     labs(title = "Total Plays by Genre as of Jan 2023",
-         subtitle = "Apple Music Song Library",
-         y = "",
-         x = "",
+         subtitle = "Top perfoming songs in popular categories and their play counts are highlighted",
+         y = NULL,
+         x = NULL,
          caption = glue(R.version.string, ", Matteo Zucchi")) +
     geom_hline(yintercept = 0, size = 0.2) +
     scale_y_continuous(expand = c(0, 10), limits = c(0, 900)) +
@@ -133,7 +134,7 @@ clean_genres_jan2023 %>%
     theme(
       text = element_text(size = 9),
       plot.title = element_text(size = 14, face = "bold"),
-      plot.subtitle = element_text(size = 11, margin = margin(b = 6, unit = "pt")),
+      plot.subtitle = ggtext::element_textbox_simple(size = 10, margin = margin(b = 10, t = 5, unit = "pt")),
       plot.caption = element_text(size = 8, hjust = 0, margin = margin(t = 10, unit = "pt")),
       axis.ticks = element_blank(),
       axis.line = element_blank(),
