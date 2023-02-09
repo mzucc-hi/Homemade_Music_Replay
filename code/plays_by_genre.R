@@ -1,6 +1,8 @@
 # Explore different visualisations of what genres I listen to
 
-# Requirements
+
+# Requirements ------------------------------------------------------------
+
 source("code/data_import.R")
 
 plays_jan2023
@@ -12,8 +14,11 @@ library(shadowtext)
 library(ggpubr)
 library(ggthemes)
 library(glue)
+library(ggforce)
 
-# Exploration
+
+# Exploration -------------------------------------------------------------
+
 
 plays_jan2023 %>% 
   select(genre, plays) %>% 
@@ -55,12 +60,30 @@ genres_jan2023 <- plays_jan2023 %>%
 )
 
 
-# Visualisation
 
-## Total plays by genre copy to add as data source for labelling
+# Visualisation -----------------------------------------------------------
+
+### Total plays by genre copy to add as data source for labelling
 
 genres_labels <- clean_genres_jan2023 %>% 
   mutate(y = (total_plays + 13))
+
+### Extract most-played song for top 3 genres for extra detail
+
+top_song_label <- plays_jan2023 %>% 
+  filter(genre == "Alternative" | genre == "Pop" | genre == "Singer/Songwriter" |
+         genre == "Christian") %>% 
+  group_by(genre) %>% 
+  arrange(desc(plays), .by_group = T) %>% 
+  slice_head(n = 1) %>% 
+  select(title, artist, genre, plays) %>% 
+  # Use a join to get total plays by genre
+  left_join(genres_labels, by = "genre") %>% 
+  mutate(percent_of_genre_plays = (plays/total_plays) * 100) %>% 
+  select(-c(total_plays, y))
+
+
+### Plot
 
 clean_genres_jan2023 %>% 
   ggplot() +
@@ -70,8 +93,30 @@ clean_genres_jan2023 %>%
              show.legend = F,
              width = 0.6,
              alpha = 0.65) +
+    geom_col(data = top_song_label,
+             aes(x = genre, y = plays),
+             alpha = 0.1,
+             colour = "black",
+             lwd = 0.4,
+             width = 0.6) +
+    ggforce::geom_mark_ellipse(
+      data = top_song_label,
+      aes(x = genre, y = plays, label = paste0("'", title, "', ", artist)),
+      expand = unit(0, "mm"),
+      label.margin = margin(b =0, l = 0, r = 0, t = 1.5, "mm"),
+      label.buffer = unit(1, "mm"),
+      label.hjust = 1,
+      label.lineheight = 1,
+      label.fill = NA,
+      label.fontsize = 9,
+      label.family = "sans",
+      label.fontface = "plain",
+      con.size = 0.25,
+      con.type = "straight",
+      con.border = "none"
+    ) +
     coord_flip() +
-    labs(title = "Total Plays by Genre — Jan 2023",
+    labs(title = "Total Plays by Genre as of Jan 2023",
          subtitle = "Apple Music Song Library",
          y = "",
          x = "",
